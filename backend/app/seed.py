@@ -48,11 +48,25 @@ IMAGE_URLS = {
     "life-1":"photo-1553062407-98eeb64c6a62", "life-2":"photo-1602143407151-7111542de6e8", "life-3":"photo-1627123424574-724758594e93", "life-4":"photo-1511499767150-a48a237f0083", "life-5":"photo-1456324504439-367cee3b3c32", "life-6":"photo-1512418490979-92798cec1380", "life-7":"photo-1456324504439-367cee3b3c32",
 }
 
+def _seed_into(conn) -> None:
+    for title, desc, price, image, category in P:
+        # Stable image seeds keep cards varied without bundling large assets.
+        url = f"https://images.unsplash.com/{IMAGE_URLS[image]}?auto=format&fit=crop&w=700&q=85"
+        conn.execute(
+            "INSERT INTO products (title,description,price_kopecks,photo_url,category) "
+            "VALUES (?,?,?,?,?)",
+            (title, desc, price, url, category),
+        )
+        conn.execute("INSERT OR IGNORE INTO categories (name) VALUES (?)", (category,))
+    print(f"Каталог добавлен: {len(P)} товаров")
+
+
 def seed() -> None:
+    """Reset the product catalogue to the bundled demo catalogue (manual use)."""
     init_db()
     with db_session() as conn:
+        # Preserve the original explicit seed command's behaviour for local use.
         for i, (title, desc, price, image, category) in enumerate(P, 1):
-            # Stable image seeds keep cards varied without bundling large assets.
             url = f"https://images.unsplash.com/{IMAGE_URLS[image]}?auto=format&fit=crop&w=700&q=85"
             row = conn.execute("SELECT id FROM products ORDER BY id LIMIT 1 OFFSET ?", (i - 1,)).fetchone()
             if row:
@@ -64,6 +78,19 @@ def seed() -> None:
         placeholders = ",".join("?" for _ in keep)
         conn.execute(f"DELETE FROM categories WHERE name NOT IN ({placeholders}) AND name NOT IN (SELECT DISTINCT category FROM products)", keep)
         print(f"Каталог обновлён: {len(P)} товаров")
+
+
+def seed_if_empty() -> bool:
+    """Add the default catalogue only when products is empty.
+
+    The write lock makes the check-and-seed operation safe if startup overlaps.
+    """
+    with db_session() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        if conn.execute("SELECT 1 FROM products LIMIT 1").fetchone():
+            return False
+        _seed_into(conn)
+        return True
 
 if __name__ == "__main__":
     seed()

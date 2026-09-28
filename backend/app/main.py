@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import get_settings
 from .db import init_db
+from .seed import seed_if_empty
 from .routers import (
     admin,
     internal,
@@ -21,6 +22,7 @@ from .routers import (
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
+    seed_if_empty()
     yield
 
 
