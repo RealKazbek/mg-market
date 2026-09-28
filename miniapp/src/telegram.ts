@@ -5,7 +5,7 @@ interface TgWebApp {
   themeParams: Record<string, string>
   viewportHeight?: number
   viewportStableHeight?: number
-  initDataUnsafe?: { user?: { language_code?: string } }
+  initDataUnsafe?: { user?: { language_code?: string; first_name?: string }; start_param?: string }
   ready: () => void
   expand: () => void
   openLink: (url: string) => void
@@ -49,6 +49,12 @@ export function getInitData(): string {
 // Язык пользователя из Telegram (например, "ru", "en") — для выбора языка по умолчанию.
 export function getLanguageCode(): string {
   return tg()?.initDataUnsafe?.user?.language_code ?? ""
+}
+
+export function getStartParam(): string {
+  const fromTelegram = tg()?.initDataUnsafe?.start_param
+  if (fromTelegram) return fromTelegram
+  return new URLSearchParams(window.location.search).get("startapp") || ""
 }
 
 // Переносим тему Telegram в CSS-переменные --tg-theme-*.

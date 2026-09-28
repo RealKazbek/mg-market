@@ -117,7 +117,7 @@ write_ton_manifest() {  # write_ton_manifest <base-url>
   cat > miniapp/public/tonconnect-manifest.json <<EOF
 {
   "url": "$base",
-  "name": "TG Shop",
+  "name": "MG Market",
   "iconUrl": "https://ton.org/download/ton_symbol.png"
 }
 EOF

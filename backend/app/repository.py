@@ -318,7 +318,7 @@ def get_user_lang(conn: sqlite3.Connection, user_tg_id: int) -> Optional[str]:
     row = conn.execute(
         "SELECT lang FROM user_prefs WHERE user_tg_id = ?", (user_tg_id,)
     ).fetchone()
-    if row and row["lang"] in ("ru", "en"):
+    if row and row["lang"] in ("kk", "ru", "en"):
         return row["lang"]
     return None
 
@@ -329,6 +329,15 @@ def set_user_lang(conn: sqlite3.Connection, user_tg_id: int, lang: str) -> None:
         "ON CONFLICT(user_tg_id) DO UPDATE SET lang = excluded.lang",
         (user_tg_id, lang),
     )
+
+
+def get_user_currency(conn: sqlite3.Connection, user_tg_id: int) -> str:
+    row = conn.execute("SELECT currency FROM user_prefs WHERE user_tg_id = ?", (user_tg_id,)).fetchone()
+    return row["currency"] if row and row["currency"] in ("KZT", "RUB", "USD") else "KZT"
+
+
+def set_user_currency(conn: sqlite3.Connection, user_tg_id: int, currency: str) -> None:
+    conn.execute("INSERT INTO user_prefs (user_tg_id, currency) VALUES (?, ?) ON CONFLICT(user_tg_id) DO UPDATE SET currency = excluded.currency", (user_tg_id, currency))
 
 
 def get_setting(conn: sqlite3.Connection, key: str) -> Optional[str]:

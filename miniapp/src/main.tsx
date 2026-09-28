@@ -21,7 +21,7 @@ const manifestUrl = `${window.location.origin}/tonconnect-manifest.json`
 function Root() {
   const { lang } = useI18n()
   return (
-    <TonConnectUIProvider manifestUrl={manifestUrl} language={lang}>
+    <TonConnectUIProvider manifestUrl={manifestUrl} language={lang === "kk" ? "en" : lang}>
       <CartProvider>
         <App />
       </CartProvider>

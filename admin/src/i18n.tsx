@@ -132,9 +132,11 @@ const en: Dict = {
   del_confirm: "Delete this product permanently?",
 }
 
-const messages: Record<Lang, Dict> = { ru, en }
+const kk: Dict = { ...ru }
+const messages: Record<Lang, Dict> = { ru, en, kk }
 
 const STATUS: Record<Lang, Record<string, string>> = {
+  kk: { new: "Төлем күтілуде", paid: "Төленді", shipped: "Жолда", done: "Аяқталды", canceled: "Бас тартылды" },
   ru: {
     new: "Ожидает оплаты",
     paid: "Оплачен",
@@ -152,6 +154,7 @@ const STATUS: Record<Lang, Record<string, string>> = {
 }
 
 const METHOD: Record<Lang, Record<string, string>> = {
+  kk: { mock: "Тест", robokassa: "Robokassa", ton: "TON", usdt_ton: "USDT", crypto: "Крипто", card: "Карта/СБП", "": "—" },
   ru: {
     mock: "Тестовая",
     robokassa: "Robokassa",
@@ -173,6 +176,7 @@ const METHOD: Record<Lang, Record<string, string>> = {
 }
 
 const CATEGORY: Record<Lang, Record<string, string>> = {
+  kk: { "Электроника": "Электроника", "Смартфоны и аксессуары": "Смартфондар", "Для дома": "Үйге", "Авто": "Авто", "Lifestyle": "Өмір салты" },
   ru: {
     "День рождения": "День рождения",
     "Свадьба": "Свадьба",

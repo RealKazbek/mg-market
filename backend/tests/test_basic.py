@@ -101,5 +101,7 @@ def test_valid_init_data_accepted():
 def test_tampered_init_data_rejected():
     token = "123456:TEST"
     init_data = _make_init_data(token, {"id": 42})
-    tampered = init_data.replace("id%3A42", "id%3A999")
+    # `urlencode` encodes the JSON quotes as well, so replace the actual
+    # encoded user id fragment rather than an unencoded JSON fragment.
+    tampered = init_data.replace("%22id%22%3A42", "%22id%22%3A999")
     assert auth.validate_init_data(tampered, token, max_age=86400) is None

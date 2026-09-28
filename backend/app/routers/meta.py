@@ -10,11 +10,12 @@ from ..db import db_session
 
 router = APIRouter(prefix="/api", tags=["meta"])
 
-# Метаданные валют витрины. Базовая валюта цен в БД — RUB.
+# Цены каталога хранятся в тиынах KZT. ISO-код оставляем для интеграций.
 _CURRENCY_META = [
-    {"code": "RUB", "symbol": "\u20bd", "locale": "ru-RU"},
-    {"code": "USD", "symbol": "$", "locale": "en-US"},
-    {"code": "EUR", "symbol": "\u20ac", "locale": "de-DE"},
+    {"code": "KZT", "symbol": "₸", "locale": "kk-KZ", "kzt_per_unit": 1.0},
+    # Development snapshot: 1 RUB ≈ 5.2 KZT, 1 USD ≈ 500 KZT.
+    {"code": "RUB", "symbol": "₽", "locale": "ru-RU", "kzt_per_unit": 5.2},
+    {"code": "USD", "symbol": "$", "locale": "en-US", "kzt_per_unit": 500.0},
 ]
 
 
@@ -26,15 +27,6 @@ def list_categories():
 
 @router.get("/currencies")
 def list_currencies():
-    """Курсы для витрины: rub_per_unit = сколько ₽ стоит 1 единица валюты."""
+    """Static demo rates from canonical KZT; not live market rates."""
     settings = get_settings()
-    fiat = rates.get_fiat_rates(
-        settings.fiat_rate_ttl,
-        settings.rub_per_usd_fallback,
-        settings.rub_per_eur_fallback,
-    )
-    currencies = [
-        {**meta, "rub_per_unit": round(float(fiat.get(meta["code"], 1.0)), 6)}
-        for meta in _CURRENCY_META
-    ]
-    return {"base": "RUB", "currencies": currencies}
+    return {"base": "KZT", "currencies": _CURRENCY_META}

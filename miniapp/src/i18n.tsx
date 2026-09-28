@@ -1,221 +1,27 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react"
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
 import type { ReactNode } from "react"
 import type { Lang } from "../../shared/types"
 import { getLanguageCode } from "./telegram"
-
 export type { Lang }
-
 type Dict = Record<string, string>
 
-const MESSAGES: Record<string, [string, string]> = {
-  tab_catalog: ["Каталог", "Catalog"],
-  tab_cart: ["Корзина", "Cart"],
-  tab_orders: ["Заказы", "Orders"],
-  shop_title: ["Магазин подарков", "Gift Shop"],
-  loading: ["Загрузка…", "Loading…"],
-  nothing_found: ["Ничего не найдено.", "Nothing found."],
-  category_all: ["Все", "All"],
-  add_to_cart: ["В корзину", "Add to cart"],
-  cart_title: ["Корзина", "Cart"],
-  cart_empty: ["Корзина пуста.", "Your cart is empty."],
-  go_to_catalog: ["Перейти в каталог", "Go to catalog"],
-  total: ["Итого", "Total"],
-  creating_order: ["Создаём заказ…", "Creating order…"],
-  checkout: ["Оформить и оплатить", "Checkout & pay"],
-  methods_none: ["Способы оплаты пока не настроены.", "No payment methods configured yet."],
-  payment_method: ["Способ оплаты", "Payment method"],
-  remove: ["Удалить", "Remove"],
-  my_orders: ["Мои заказы", "My orders"],
-  no_orders: ["Заказов пока нет.", "No orders yet."],
-  order_no: ["Заказ №{id}", "Order #{id}"],
-  pay_in: ["Оплата в {asset}", "Pay in {asset}"],
-  wallet: ["Кошелёк", "Wallet"],
-  comment_hint: ["Комментарий к переводу ({comment}) подставляется автоматически — не меняйте его, по нему подтверждается оплата.", "The transfer comment ({comment}) is added automatically — don't change it, the payment is confirmed by it."],
-  network_testnet: ["Сеть: testnet (тестовые монеты).", "Network: testnet (test coins)."],
-  connect_wallet_first: ["Сначала подключите кошелёк", "Connect your wallet first"],
-  sending: ["Отправляем…", "Sending…"],
-  pay_button: ["Оплатить {amount} {asset}", "Pay {amount} {asset}"],
-  after_confirm_hint: ["После подтверждения в кошельке оплата определится автоматически за несколько секунд.", "After you confirm in your wallet, the payment is detected automatically within seconds."],
-  paid_title: ["Оплачено ✅", "Paid ✅"],
-  paid_desc: ["Заказ №{id} оплачен в {asset}. Бот прислал подтверждение.", "Order #{id} paid in {asset}. The bot sent a confirmation."],
-  to_my_orders: ["К моим заказам", "To my orders"],
-  err_send: ["Не удалось отправить транзакцию", "Failed to send the transaction"],
-  err_no_usdt_wallet: ["У кошелька нет USDT-баланса в сети TON", "This wallet has no USDT balance in the TON network"],
-  err_find_usdt_wallet: ["Не удалось найти ваш USDT-кошелёк в сети TON", "Couldn't find your USDT wallet in the TON network"],
-  err_bad_usdt_addr: ["Получен некорректный адрес USDT-кошелька от TonAPI", "Received an invalid USDT wallet address from TonAPI"],
-  to_pay: ["К оплате:", "To pay:"],
-  copy_details: ["📋 Скопировать реквизиты", "📋 Copy details"],
-  copied: ["Скопировано ✓", "Copied ✓"],
-  claimed_note: ["✅ Спасибо! Мы проверим поступление и подтвердим заказ. Статус — в разделе «Заказы».", "✅ Thanks! We'll verify the payment and confirm your order. The status is in the “Orders” tab."],
-  i_paid: ["Я оплатил", "I've paid"],
-}
-
-// ru/en выводятся из единой таблицы MESSAGES — без дублирующихся словарей.
-const ru: Dict = {}
-const en: Dict = {}
-for (const [key, [rus, eng]] of Object.entries(MESSAGES)) {
-  ru[key] = rus
-  en[key] = eng
-}
-
-const messages: Record<Lang, Dict> = { ru, en }
-
-// Категории хранятся в БД по-русски; это их отображаемые подписи.
-const CATEGORY: Record<Lang, Record<string, string>> = {
+const dictionaries: Record<Lang, Dict> = {
   ru: {
-    "День рождения": "День рождения",
-    "Свадьба": "Свадьба",
-    "Извинение": "Извинение",
-    "Без повода": "Без повода",
+    tab_catalog:"Каталог",tab_cart:"Корзина",tab_orders:"Заказы",shop_title:"MG Market",shop_subtitle:"Товары для жизни — с доставкой по Казахстану",search:"Найти товар",search_empty:"Ничего не нашли 🔎",search_empty_desc:"Попробуйте изменить запрос или выбрать другую категорию.",loading:"Загружаем витрину…",nothing_found:"В этой категории пока нет товаров.",category_all:"Все",add_to_cart:"В корзину",added:"Добавлено",cart_title:"Корзина",cart_empty:"🛒 Корзина пока пустая",cart_empty_desc:"Добавьте товары из каталога — они появятся здесь.",go_to_catalog:"Перейти в каталог",total:"Итого",creating_order:"Оформляем…",checkout:"Оформить заказ",methods_none:"Способы оплаты пока недоступны.",payment_method:"Способ оплаты",remove:"Удалить",my_orders:"Мои заказы",no_orders:"У вас пока нет заказов",no_orders_desc:"Когда оформите первый заказ, он появится здесь.",order_no:"Заказ №{id}",pay_in:"Оплата в {asset}",wallet:"Кошелёк",to_pay:"К оплате:",copy_details:"Скопировать реквизиты",copied:"Скопировано ✓",i_paid:"Я оплатил",claimed_note:"Спасибо! Мы проверим оплату и сообщим о статусе в Telegram.",lang_welcome:"👋 Добро пожаловать!",lang_hint:"Выберите язык, на котором вам будет удобно пользоваться магазином.",after_confirm_hint:"После подтверждения оплата определится автоматически.",comment_hint:"Комментарий подставляется автоматически — не меняйте его.",connect_wallet_first:"Сначала подключите кошелёк",sending:"Отправляем…",network_testnet:"Тестовая сеть",pay_button:"Оплатить {amount} {asset}",paid_title:"Оплачено ✅",paid_desc:"Заказ №{id} оплачен.",to_my_orders:"К моим заказам",err_send:"Не удалось отправить транзакцию",err_no_usdt_wallet:"У кошелька нет USDT-баланса",err_find_usdt_wallet:"Не удалось найти USDT-кошелёк",err_bad_usdt_addr:"Некорректный адрес USDT-кошелька",
+  },
+  kk: {
+    tab_catalog:"Каталог",tab_cart:"Себет",tab_orders:"Тапсырыстар",shop_title:"MG Market",shop_subtitle:"Қазақстан бойынша жеткізілетін күнделікті тауарлар",search:"Тауар іздеу",search_empty:"Ештеңе табылмады 🔎",search_empty_desc:"Іздеу сөзін өзгертіп көріңіз немесе басқа санатты таңдаңыз.",loading:"Витринаны жүктеп жатырмыз…",nothing_found:"Бұл санатта әзірге тауар жоқ.",category_all:"Барлығы",add_to_cart:"Себетке қосу",added:"Қосылды",cart_title:"Себет",cart_empty:"🛒 Себет әзірге бос",cart_empty_desc:"Каталогтан тауар қосыңыз — олар осы жерде пайда болады.",go_to_catalog:"Каталогқа өту",total:"Барлығы",creating_order:"Рәсімдеп жатырмыз…",checkout:"Тапсырыс беру",methods_none:"Төлем тәсілдері әзірге қолжетімсіз.",payment_method:"Төлем тәсілі",remove:"Жою",my_orders:"Тапсырыстарым",no_orders:"Әзірге тапсырыстарыңыз жоқ",no_orders_desc:"Алғашқы тапсырысты рәсімдегеннен кейін ол осы жерде көрсетіледі.",order_no:"Тапсырыс №{id}",pay_in:"{asset} арқылы төлеу",wallet:"Әмиян",to_pay:"Төлеуге:",copy_details:"Деректерді көшіру",copied:"Көшірілді ✓",i_paid:"Төледім",claimed_note:"Рақмет! Төлемді тексеріп, мәртебесін Telegram арқылы хабарлаймыз.",lang_welcome:"👋 Қош келдіңіз!",lang_hint:"Дүкенді қай тілде пайдаланғыңыз келетінін таңдаңыз.",after_confirm_hint:"Расталғаннан кейін төлем автоматты анықталады.",comment_hint:"Түсініктеме автоматты қойылады — өзгертпеңіз.",connect_wallet_first:"Алдымен әмиянды қосыңыз",sending:"Жіберілуде…",network_testnet:"Тест желісі",pay_button:"{amount} {asset} төлеу",paid_title:"Төленді ✅",paid_desc:"№{id} тапсырыс төленді.",to_my_orders:"Тапсырыстарыма",err_send:"Транзакцияны жіберу мүмкін болмады",err_no_usdt_wallet:"Әмиянда USDT балансы жоқ",err_find_usdt_wallet:"USDT әмияны табылмады",err_bad_usdt_addr:"USDT әмиянының адресі қате",
   },
   en: {
-    "День рождения": "Birthday",
-    "Свадьба": "Wedding",
-    "Извинение": "Apology",
-    "Без повода": "Just because",
+    tab_catalog:"Catalog",tab_cart:"Cart",tab_orders:"Orders",shop_title:"MG Market",shop_subtitle:"Everyday essentials, delivered across Kazakhstan",search:"Search products",search_empty:"Nothing found 🔎",search_empty_desc:"Try another search or browse a different category.",loading:"Loading your storefront…",nothing_found:"No products in this category yet.",category_all:"All",add_to_cart:"Add to cart",added:"Added",cart_title:"Cart",cart_empty:"🛒 Your cart is empty",cart_empty_desc:"Add something from the catalog and it will appear here.",go_to_catalog:"Browse products",total:"Total",creating_order:"Placing order…",checkout:"Place order",methods_none:"No payment methods are available yet.",payment_method:"Payment method",remove:"Remove",my_orders:"My orders",no_orders:"No orders yet",no_orders_desc:"Your first order will appear here once you place it.",order_no:"Order #{id}",pay_in:"Pay in {asset}",wallet:"Wallet",to_pay:"To pay:",copy_details:"Copy details",copied:"Copied ✓",i_paid:"I’ve paid",claimed_note:"Thanks! We’ll verify the payment and update you in Telegram.",lang_welcome:"👋 Welcome!",lang_hint:"Choose the language you’d like to use in the store.",after_confirm_hint:"Payment is detected automatically after confirmation.",comment_hint:"The comment is added automatically — don’t change it.",connect_wallet_first:"Connect your wallet first",sending:"Sending…",network_testnet:"Test network",pay_button:"Pay {amount} {asset}",paid_title:"Paid ✅",paid_desc:"Order #{id} has been paid.",to_my_orders:"To my orders",err_send:"Failed to send the transaction",err_no_usdt_wallet:"This wallet has no USDT balance",err_find_usdt_wallet:"Couldn’t find the USDT wallet",err_bad_usdt_addr:"Invalid USDT wallet address",
   },
 }
-
-// Подписи способов оплаты по id (backend отдаёт русские title/description).
-// Для EN подменяем их по id; для неизвестных id — фоллбэк на бэкенд.
-export const METHOD_LABELS: Record<
-  Lang,
-  Record<string, { title: string; description: string }>
-> = {
-  ru: {},
-  en: {
-    mock: {
-      title: "Test payment",
-      description: "Instant test payment (no real charge)",
-    },
-    robokassa: {
-      title: "Bank card (Robokassa)",
-      description: "Pay by card via Robokassa",
-    },
-    ton: { title: "TON", description: "Pay with TON via TON Connect" },
-    usdt_ton: {
-      title: "USDT (TON)",
-      description: "Pay with USDT in the TON network",
-    },
-    manual: {
-      title: "Manual transfer",
-      description: "Transfer by the details, then tap “I've paid”",
-    },
-  },
-}
-
-const STATUS: Record<Lang, Record<string, string>> = {
-  ru: {
-    new: "Ожидает оплаты",
-    paid: "Оплачен",
-    shipped: "Отправлен",
-    done: "Завершён",
-    canceled: "Отменён",
-  },
-  en: {
-    new: "Awaiting payment",
-    paid: "Paid",
-    shipped: "Shipped",
-    done: "Done",
-    canceled: "Canceled",
-  },
-}
-
-export function statusLabel(lang: Lang, status: string): string {
-  return STATUS[lang][status] ?? status
-}
-
-export function categoryLabel(lang: Lang, category: string): string {
-  return CATEGORY[lang][category] ?? category
-}
-
-interface I18nValue {
-  lang: Lang
-  setLang: (l: Lang) => void
-  t: (key: string, params?: Record<string, string | number>) => string
-}
-
-const I18nContext = createContext<I18nValue | null>(null)
-const STORAGE_KEY = "tg-shop-lang"
-
-// Единая точка сохранения выбранного языка (используется и при детекте, и в эффекте).
-function saveLang(lang: Lang): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, lang)
-  } catch {
-    /* ignore */
-  }
-}
-
-// Язык из URL (?lang=ru|en) — его пробрасывает бот после выбора языка в /start.
-function urlLang(): Lang | null {
-  try {
-    const v = (new URLSearchParams(window.location.search).get("lang") || "")
-      .toLowerCase()
-    if (v === "ru" || v === "en") return v
-  } catch {
-    /* ignore */
-  }
-  return null
-}
-
-function detectLang(): Lang {
-  // 1) Явный выбор из бота (URL) — высший приоритет, сразу запоминаем.
-  const fromUrl = urlLang()
-  if (fromUrl) {
-    saveLang(fromUrl)
-    return fromUrl
-  }
-  // 2) Сохранённый ранее выбор.
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved === "ru" || saved === "en") return saved
-  } catch {
-    /* ignore */
-  }
-  // 3) Язык Telegram.
-  const code = (getLanguageCode() || "").toLowerCase()
-  return code.startsWith("ru") ? "ru" : "en"
-}
-
-export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(detectLang)
-
-  useEffect(() => {
-    saveLang(lang)
-  }, [lang])
-
-  const setLang = useCallback((l: Lang) => setLangState(l), [])
-
-  const t = useCallback(
-    (key: string, params?: Record<string, string | number>) => {
-      let text = messages[lang][key] ?? messages.en[key] ?? key
-      if (params) {
-        for (const [k, v] of Object.entries(params)) {
-          text = text.split("{" + k + "}").join(String(v))
-        }
-      }
-      return text
-    },
-    [lang],
-  )
-
-  const value = useMemo<I18nValue>(
-    () => ({ lang, setLang, t }),
-    [lang, setLang, t],
-  )
-  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>
-}
-
-export function useI18n(): I18nValue {
-  const ctx = useContext(I18nContext)
-  if (!ctx) throw new Error("useI18n должен быть внутри I18nProvider")
-  return ctx
-}
+const CATEGORY: Record<Lang, Record<string,string>> = { kk:{"Электроника":"Электроника","Смартфоны и аксессуары":"Смартфондар","Для дома":"Үйге","Авто":"Авто","Lifestyle":"Өмір салты"},ru:{"Электроника":"Электроника","Смартфоны и аксессуары":"Смартфоны и аксессуары","Для дома":"Для дома","Авто":"Авто","Lifestyle":"Lifestyle"},en:{"Электроника":"Electronics","Смартфоны и аксессуары":"Phones & accessories","Для дома":"Home","Авто":"Auto","Lifestyle":"Lifestyle"} }
+const STATUS: Record<Lang, Record<string,string>> = { kk:{new:"Төлем күтілуде",paid:"Төленді",shipped:"Жолда",done:"Аяқталды",canceled:"Бас тартылды"},ru:{new:"Ожидает оплаты",paid:"Оплачен",shipped:"Отправлен",done:"Завершён",canceled:"Отменён"},en:{new:"Awaiting payment",paid:"Paid",shipped:"Shipped",done:"Done",canceled:"Canceled"} }
+export const METHOD_LABELS: Record<Lang, Record<string,{title:string;description:string}>> = { kk:{mock:{title:"Тест төлемі",description:"Нақты ақша алынбайды"}},ru:{},en:{mock:{title:"Test payment",description:"Instant test payment (no real charge)"}} }
+export function statusLabel(lang:Lang,status:string){return STATUS[lang][status]??status}; export function categoryLabel(lang:Lang,category:string){return CATEGORY[lang][category]??category}
+interface I18nValue { lang:Lang; setLang:(l:Lang)=>void; t:(key:string,params?:Record<string,string|number>)=>string }
+const C=createContext<I18nValue|null>(null);const STORAGE_KEY="mg-market-lang"
+function detectLang():Lang{const v=new URLSearchParams(window.location.search).get("lang");if(v==="kk"||v==="ru"||v==="en")return v;try{const s=localStorage.getItem(STORAGE_KEY);if(s==="kk"||s==="ru"||s==="en")return s}catch{}const c=getLanguageCode().toLowerCase();return c.startsWith("kk")||c.startsWith("kaz")?"kk":c.startsWith("ru")?"ru":"en"}
+export function I18nProvider({children}:{children:ReactNode}){const [lang,setLangState]=useState<Lang>(detectLang);useEffect(()=>{try{localStorage.setItem(STORAGE_KEY,lang)}catch{}},[lang]);const setLang=useCallback((l:Lang)=>setLangState(l),[]);const t=useCallback((key:string,p?:Record<string,string|number>)=>{let s=dictionaries[lang][key]??dictionaries.en[key]??key;Object.entries(p??{}).forEach(([k,v])=>s=s.split(`{${k}}`).join(String(v)));return s},[lang]);return <C.Provider value={useMemo(()=>({lang,setLang,t}),[lang,setLang,t])}>{children}</C.Provider>}
+export function useI18n(){const v=useContext(C);if(!v)throw new Error("useI18n must be inside provider");return v}

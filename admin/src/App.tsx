@@ -29,7 +29,7 @@ export function App() {
     <div className="layout">
       <aside className="sidebar">
         <div className="sidebar__brand">
-          🛍️ TG Shop
+          🛍️ MG Market
           <span>{t("brand_sub")}</span>
         </div>
         <nav className="sidebar__nav">

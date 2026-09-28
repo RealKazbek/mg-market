@@ -13,7 +13,7 @@ from .. import messages
 from .. import repository as repo
 from ..config import get_settings
 from ..db import db_session
-from ..models import OrderOut, UserLangIn
+from ..models import OrderOut, UserLangIn, UserCurrencyIn
 
 router = APIRouter(prefix="/api/internal", tags=["internal"])
 
@@ -37,7 +37,7 @@ def bot_orders(user_tg_id: int, x_internal_secret: str = Header(default="")):
 def set_user_lang(body: UserLangIn, x_internal_secret: str = Header(default="")):
     """Сохранить выбранный в /start язык пользователя (ru|en)."""
     _check_secret(x_internal_secret)
-    lang = "en" if messages.norm_lang(body.lang) == "en" else "ru"
+    lang = messages.norm_lang(body.lang)
     with db_session() as conn:
         repo.set_user_lang(conn, body.user_tg_id, lang)
     return {"ok": True, "lang": lang}
@@ -49,3 +49,20 @@ def get_user_lang(user_tg_id: int, x_internal_secret: str = Header(default="")):
     _check_secret(x_internal_secret)
     with db_session() as conn:
         return {"lang": repo.get_user_lang(conn, user_tg_id)}
+
+
+@router.post("/user-currency")
+def set_user_currency(body: UserCurrencyIn, x_internal_secret: str = Header(default="")):
+    _check_secret(x_internal_secret)
+    if body.currency not in ("KZT", "RUB", "USD"):
+        raise HTTPException(status_code=400, detail="Недопустимая валюта")
+    with db_session() as conn:
+        repo.set_user_currency(conn, body.user_tg_id, body.currency)
+    return {"ok": True, "currency": body.currency}
+
+
+@router.get("/user-currency/{user_tg_id}")
+def get_user_currency(user_tg_id: int, x_internal_secret: str = Header(default="")):
+    _check_secret(x_internal_secret)
+    with db_session() as conn:
+        return {"currency": repo.get_user_currency(conn, user_tg_id)}

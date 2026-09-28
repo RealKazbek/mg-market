@@ -32,6 +32,7 @@ def _migrate(conn: sqlite3.Connection) -> None:
         "ALTER TABLE orders ADD COLUMN pay_amount_nano INTEGER",
         "ALTER TABLE orders ADD COLUMN pay_comment TEXT",
         "ALTER TABLE orders ADD COLUMN user_lang TEXT NOT NULL DEFAULT ''",
+        "ALTER TABLE user_prefs ADD COLUMN currency TEXT NOT NULL DEFAULT 'KZT'",
     ):
         try:
             conn.execute(ddl)

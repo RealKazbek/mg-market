@@ -1,4 +1,4 @@
-"""Локализация текстов уведомлений (RU/EN).
+"""Локализация текстов уведомлений (KK/RU/EN).
 
 Язык покупателя берётся из его Telegram language_code (сохраняется в заказе).
 Язык админских уведомлений — из настройки ADMIN_LANG.
@@ -10,10 +10,14 @@ def norm_lang(code: Optional[str]) -> str:
     """Нормализовать код языка в  'ru' | 'en' (пустота -> 'ru')."""
     if not code:
         return "ru"
-    return "ru" if str(code).strip().lower().startswith("ru") else "en"
+    value = str(code).strip().lower()
+    if value.startswith("kk") or value.startswith("kaz"):
+        return "kk"
+    return "ru" if value.startswith("ru") else "en"
 
 
 _METHOD = {
+    "kk": {"mock": "Тест", "robokassa": "Robokassa", "ton": "TON", "usdt_ton": "USDT", "crypto": "Крипто", "card": "Карта/СБП"},
     "ru": {
         "mock": "Тестовая",
         "robokassa": "Robokassa",
@@ -38,13 +42,14 @@ def method_label(lang: str, method: str) -> str:
 
 
 def _fmt_total(total: float) -> str:
-    # Базовая валюта цен — рубли; суммы в уведомлениях всегда в ₽.
-    return f"{total:.2f} \u20bd"
+    return f"{total:,.0f}".replace(",", " ") + " ₸"
 
 
 def user_paid(lang: str, order_id: int, total: float, asset: str = "") -> str:
     """Уведомление покупателю об успешной оплате."""
     total_str = _fmt_total(total)
+    if lang == "kk":
+        return f"✅ Төлем қабылданды!\n№{order_id} тапсырысы төленді."
     if lang == "en":
         text = f"\u2705 Payment received!\nOrder #{order_id} for {total_str} has been paid"
         return text + (f" ({asset})." if asset else ".")
@@ -63,6 +68,8 @@ def admin_paid(
 ) -> str:
     """Уведомление админу о новом оплаченном заказе."""
     total_str = _fmt_total(total)
+    if lang == "kk":
+        return f"🟢 Жаңа төленген тапсырыс №{order_id} — {total_str}\nКлиент: {user_name}\nТауарлар: {items}"
     if lang == "en":
         tag = " (TEST)" if test else ""
         head = f"\U0001f7e2{tag} New paid order #{order_id} for {total_str}"

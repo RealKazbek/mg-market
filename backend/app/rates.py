@@ -2,6 +2,7 @@
 import logging
 import threading
 import time
+from typing import Optional, Tuple
 
 import httpx
 
@@ -18,7 +19,7 @@ _ton_lock = threading.Lock()
 _ton_cache = {"rate": 0.0, "ts": 0.0}
 
 
-def _fetch_price(url: str, coin_id: str, attempts: int = 3) -> float | None:
+def _fetch_price(url: str, coin_id: str, attempts: int = 3) -> Optional[float]:
     """Тянет курс монеты к RUB с CoinGecko с несколькими попытками."""
     for i in range(attempts):
         try:
@@ -104,7 +105,7 @@ _fiat_lock = threading.Lock()
 _fiat_cache = {"usd": 0.0, "eur": 0.0, "ts": 0.0}
 
 
-def _fetch_fiat() -> tuple[float, float] | None:
+def _fetch_fiat() -> Optional[Tuple[float, float]]:
     """Вернёт (₽ за 1 USD, ₽ за 1 EUR) из базы RUB open.er-api.com."""
     url = get_settings().fiat_rate_url
     for i in range(3):

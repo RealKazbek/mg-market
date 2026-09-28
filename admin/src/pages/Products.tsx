@@ -29,7 +29,7 @@ const EMPTY: ProductInput = {
 
 // Копейки (база — рубли) -> строка в выбранной валюте для поля ввода.
 function kopecksToInput(kopecks: number, cur: Currency): string {
-  const amount = kopecks / 100 / (cur.rub_per_unit || 1)
+  const amount = kopecks / 100 / (cur.kzt_per_unit || 1)
   return String(Number(amount.toFixed(2)))
 }
 
@@ -93,7 +93,7 @@ export function Products() {
     e.preventDefault()
     setError(null)
     const kopecks = Math.round(
-      parseFloat(priceValue || "0") * (currency.rub_per_unit || 1) * 100,
+      parseFloat(priceValue || "0") * (currency.kzt_per_unit || 1) * 100,
     )
     const payload: ProductInput = { ...form, price_kopecks: kopecks }
     try {

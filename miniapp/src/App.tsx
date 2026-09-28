@@ -6,18 +6,22 @@ import { Cart } from "./pages/Cart"
 import { Catalog } from "./pages/Catalog"
 import { Orders } from "./pages/Orders"
 import { useCart } from "./store/cart"
+import { getStartParam } from "./telegram"
 
 type Tab = "catalog" | "cart" | "orders"
 
 export function App() {
-  const [tab, setTab] = useState<Tab>("catalog")
+  const [tab, setTab] = useState<Tab>(() => {
+    const shortcut = getStartParam()
+    return shortcut === "orders" ? "orders" : shortcut === "cart" ? "cart" : "catalog"
+  })
   const { count } = useCart()
   const { t } = useI18n()
 
   return (
     <div className="app">
       <header className="app__header">
-        <span className="app__brand">🛍️ {t("shop_title")}</span>
+        <span className="app__brand">{t("shop_title")}</span>
         <div className="app__controls">
           <CurrencySwitch />
           <LangSwitch />

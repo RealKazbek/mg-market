@@ -529,6 +529,26 @@ body {
   line-height: 1;
 }
 
+/* MG Market visual layer: warm, compact and Telegram-native. */
+.page { padding: 18px 16px 28px; }
+.hero { padding: 10px 2px 16px; }
+.hero .page__title { margin: 2px 0 4px; font-size: 28px; letter-spacing: -0.04em; }
+.eyebrow { color: var(--button); font-size: 11px; font-weight: 800; letter-spacing: .14em; margin: 0 0 6px; }
+.hero__subtitle { color: var(--hint); margin: 0; font-size: 14px; }
+.search { display:flex; align-items:center; gap:8px; background:var(--secondary-bg); border-radius:14px; padding:0 13px; margin:0 0 16px; color:var(--hint); }
+.search input { border:0; outline:0; background:transparent; color:var(--text); width:100%; padding:12px 0; font:inherit; }
+.empty { text-align:center; padding:42px 20px; color:var(--hint); }
+.empty strong { display:block; color:var(--text); font-size:16px; margin-top:8px; }
+.empty p { margin:6px 0; font-size:14px; }
+.empty__icon { width:46px; height:46px; display:grid; place-items:center; margin:auto; border-radius:50%; background:var(--secondary-bg); font-size:25px; }
+.card { box-shadow: 0 5px 18px rgba(30,42,55,.06); border:1px solid rgba(127,127,127,.08); }
+.card__image { aspect-ratio: 1 / 1.05; }
+.card__title { min-height:36px; }
+.card__price { font-size:17px; letter-spacing:-.02em; }
+.btn { min-height:44px; border-radius:12px; }
+.chip { padding:9px 15px; }
+@media (max-width: 340px) { .grid { gap:8px; } .card__body { padding:8px; } .card__title { font-size:13px; } }
+
 .cur-switch__btn.is-active {
   background: var(--tg-theme-button-color, #2783de);
   color: var(--tg-theme-button-text-color, #fff);

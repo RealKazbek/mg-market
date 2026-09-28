@@ -12,7 +12,7 @@ export function CurrencySwitch() {
           onClick={() => setCurrency(c.code)}
           title={c.code}
         >
-          {c.symbol}
+          {c.symbol} {c.code}
         </button>
       ))}
     </div>

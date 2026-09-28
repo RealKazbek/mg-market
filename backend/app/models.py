@@ -172,5 +172,10 @@ class UserLangIn(BaseModel):
     lang: str
 
 
+class UserCurrencyIn(BaseModel):
+    user_tg_id: int
+    currency: str
+
+
 class AdminLangIn(BaseModel):
     lang: str

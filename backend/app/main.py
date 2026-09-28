@@ -26,7 +26,7 @@ async def lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     settings = get_settings()
-    app = FastAPI(title="TG Shop API", version="1.0.0", lifespan=lifespan)
+    app = FastAPI(title="MG Market API", version="1.0.0", lifespan=lifespan)
 
     origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
     app.add_middleware(

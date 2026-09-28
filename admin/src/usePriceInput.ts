@@ -12,8 +12,8 @@ export function usePriceInput(currency: Currency) {
     if (prev.code === currency.code) return
     setPriceValue((cur) => {
       const val = parseFloat(cur || "0")
-      const rub = val * (prev.rub_per_unit || 1)
-      const next = rub / (currency.rub_per_unit || 1)
+      const kzt = val * (prev.kzt_per_unit || 1)
+      const next = kzt / (currency.kzt_per_unit || 1)
       return String(Number(next.toFixed(2)))
     })
     prevCurrency.current = currency

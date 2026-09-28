@@ -3,10 +3,11 @@ import type { Currency, OrderItem, Product } from "../../shared/types"
 export type { Currency, OrderItem, Product }
 
 export const CATEGORIES = [
-  "День рождения",
-  "Свадьба",
-  "Извинение",
-  "Без повода",
+  "Электроника",
+  "Смартфоны и аксессуары",
+  "Для дома",
+  "Авто",
+  "Lifestyle",
 ] as const
 
 export interface Order {

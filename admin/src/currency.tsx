@@ -13,11 +13,11 @@ import type { Currency } from "./types"
 const STORAGE_KEY = "tg-shop-admin-currency"
 
 // Цены в БД хранятся в рублях (копейках). Резервные курсы на случай,
-// если бэкенд не ответил (rub_per_unit = сколько ₽ стоит 1 единица).
+// Demo rates from the canonical KZT price when the API is unavailable.
 const FALLBACK: Currency[] = [
-  { code: "RUB", symbol: "\u20bd", locale: "ru-RU", rub_per_unit: 1 },
-  { code: "USD", symbol: "$", locale: "en-US", rub_per_unit: 90 },
-  { code: "EUR", symbol: "\u20ac", locale: "de-DE", rub_per_unit: 98 },
+  { code: "KZT", symbol: "₸", locale: "kk-KZ", kzt_per_unit: 1 },
+  { code: "RUB", symbol: "₽", locale: "ru-RU", kzt_per_unit: 5.2 },
+  { code: "USD", symbol: "$", locale: "en-US", kzt_per_unit: 500 },
 ]
 
 interface CurrencyValue {
@@ -36,9 +36,9 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   const [ratesError, setRatesError] = useState<string | null>(null)
   const [code, setCode] = useState<string>(() => {
     try {
-      return localStorage.getItem(STORAGE_KEY) || "RUB"
+      return localStorage.getItem(STORAGE_KEY) || "KZT"
     } catch {
-      return "RUB"
+      return "KZT"
     }
   })
 
@@ -80,9 +80,8 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
   const format = useCallback(
     (kopecks: number) => {
-      const rub = kopecks / 100
-      const amount = rub / (currency.rub_per_unit || 1)
-      const digits = currency.code === "RUB" ? 0 : 2
+      const amount = kopecks / 100 / (currency.kzt_per_unit || 1)
+      const digits = currency.code === "USD" ? 2 : 0
       try {
         return new Intl.NumberFormat(currency.locale, {
           style: "currency",

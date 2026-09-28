@@ -6,17 +6,24 @@ export function LangSwitch() {
     <div className="lang-switch">
       <button
         type="button"
+        className={`lang-switch__btn ${lang === "kk" ? "is-active" : ""}`}
+        onClick={() => setLang("kk")}
+      >
+        🇰🇿
+      </button>
+      <button
+        type="button"
         className={`lang-switch__btn ${lang === "ru" ? "is-active" : ""}`}
         onClick={() => setLang("ru")}
       >
-        RU
+        🇷🇺
       </button>
       <button
         type="button"
         className={`lang-switch__btn ${lang === "en" ? "is-active" : ""}`}
         onClick={() => setLang("en")}
       >
-        EN
+        🇬🇧
       </button>
     </div>
   )
